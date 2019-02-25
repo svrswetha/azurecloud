@@ -305,6 +305,18 @@ def code():
         res.append(str(row[0]))
     return render_template('listcode.html', res=res)
 
+@app.route('/countydis', methods=['GET','POST'])
+def countydis():
+    res = []
+    co = request.form['co']
+    query1= "select distinct(counties.County), count(distinct(counties.County)) as count from counties left join statecode on counties.State = statecode.State where statecode.code = '" + co + "' group by (counties.County)"
+    print(query1)
+    cur = connection.cursor()
+    cur.execute(query1)
+     # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    return render_template('list_county.html', data = data)
 
 @app.route('/rms', methods=['POST'])
 def rms():
