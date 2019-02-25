@@ -13,12 +13,17 @@ connection = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};Server=sweth
 cursor = connection.cursor()
 print(cursor)
 
+#
+# @app.route('/')
+# def hello_world():
+#     return 'Hello !'
+
 
 @app.route('/')
-def hello_world():
-    return 'Hello !'
-
-
+def ti():
+    time_taken = 1553.81233311
+    flash('The Avg Time taken to execute the random queries is : ' + "%.4f" % time_taken + " seconds")
+    return render_template('index.html', t=time_taken)
 # @app.route('/')
 # def index():
 #     start_time = time()
@@ -62,6 +67,26 @@ def hello_world():
 #     flash('The Avg Time taken to execute the random queries is : ' + "%.4f" % time_taken + " seconds")
 #     return render_template('index.html', t=time_taken)
 #
+
+@app.route('/Limit', methods=['get', 'post'])
+def limit():
+    limit = request.form['limit']
+    print(limit)
+    print('before query')
+    query1 = "Select * from dbo.all_month where locationSource='" + limit + "';"
+    print('after query')
+    print(query1)
+    starttime = time()
+    print(starttime)
+    with connection.cursor() as cursor:
+        cursor.execute(query1)
+        connection.commit()
+        #cursor.close()
+    endtime = time()
+    print('endtime')
+    totalsqltime = endtime - starttime
+    print(totalsqltime)
+    return render_template('OK.html', time1=totalsqltime)
 
 if __name__ == '__main__':
     app.run()
