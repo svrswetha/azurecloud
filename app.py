@@ -287,6 +287,25 @@ def yearrange():
         res.append("State:" + str(row[0]))
     return render_template('list2.html', res=res, count=count)
 
+@app.route('/code', methods=['GET','POST'])
+def code():
+    res = []
+    year = request.form['year']
+    co = request.form['co']
+    query1= "select p.["+year+"] from population p left join statecode s on p.State = s.State and s.code = '" + co + "';"
+    print(query1)
+    cur = connection.cursor()
+    cur.execute(query1)
+     # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    # count = 0
+    for row in data:
+        # count = count + 1
+        res.append(str(row[0]))
+    return render_template('listcode.html', res=res)
+
+
 @app.route('/rms', methods=['POST'])
 def rms():
     beforeTime = time()
@@ -308,6 +327,7 @@ def rms():
     timeDifference = afterTime - beforeTime
     msg = "Random Queries time=" + str(timeDifference) + " hit percentage=" + str(hits / 1000 * 100) + "\n"
     return render_template('rdsquery.html', difference=msg)
+
 
 
 if __name__ == '__main__':
