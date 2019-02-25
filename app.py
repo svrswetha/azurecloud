@@ -1,3 +1,5 @@
+import math
+
 from flask import Flask, request, render_template, flash
 import pyodbc
 from time import time
@@ -5,6 +7,7 @@ import csv
 import hashlib
 import redis
 import pickle as cPickle
+from random import *
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
@@ -112,7 +115,7 @@ def memexec():
             cursor.execute(sql)
             data = cursor.fetchall()
             connection.commit()
-    cursor.close()
+    # cursor.close()
     # Put data into cache for 1 hour
     r.set(key, cPickle.dumps(data))
     r.expire(key, TTL);
@@ -122,6 +125,24 @@ def memexec():
     # print (str(float(Totaltime)))
     return render_template('memOK.html', time1=Totaltime)
     #return 'Took time : ' + str(Totaltime)
+
+@app.route('/fetch', methods=['post'])
+def fetch():
+    #normal execution
+    res = []
+    mr = request.form.get('mrs')
+    mr1 = request.form.get('mrs1')
+    mr2 = request.form.get('mrs2')
+    cur = connection.cursor()
+    cur.execute("select mag, locationSource from dbo.all_month where locationSource = '"+mr+"' and mag between '"+mr1+"' and '"+mr2+"';")
+    # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    count = 0
+    for row in data:
+        count = count + 1
+        res.append("Magnitude:" + str(row[0]) + "  ; Location:" + str(row[1]))
+    return render_template('list2.html', res=res, count=count)
 
 if __name__ == '__main__':
     app.run()
