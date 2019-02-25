@@ -3,3 +3,4 @@ pyodbc==4.0.26
 redis==3.2.0
 azure-functions==1.0.0a5
 azure-functions-worker==1.0.0a6
+Werkzeug==0.14.1
