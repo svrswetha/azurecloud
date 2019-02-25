@@ -2,7 +2,9 @@ from flask import Flask, request, render_template, flash
 import pyodbc
 from time import time
 import csv
-
+import hashlib
+import redis
+import pickle as cPickle
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
@@ -12,6 +14,9 @@ connection = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};Server=sweth
 
 cursor = connection.cursor()
 print(cursor)
+
+r = redis.StrictRedis(host="swethacache.redis.cache.windows.net",port=6380,password='abLrdUdH00V7BjipqOZ2McUopRaOkc8hgsr8jo6PRuQ=',ssl=True)
+
 
 #
 # @app.route('/')
@@ -81,12 +86,42 @@ def limit():
     with connection.cursor() as cursor:
         cursor.execute(query1)
         connection.commit()
-        #cursor.close()
+    cursor.close()
     endtime = time()
     print('endtime')
     totalsqltime = endtime - starttime
     print(totalsqltime)
     return render_template('OK.html', time1=totalsqltime)
+
+@app.route('/memexec', methods=['POST'])
+def memexec():
+    TTL = 36
+    limit = request.form['limit']
+    sql = "Select * from dbo.all_month where locationSource='" + limit + "';"
+    print("I am atlast here" + sql)
+    beforeTime = time()
+    hash = hashlib.sha224(sql.encode('utf-8')).hexdigest()
+    key = "sql_cache:" + hash
+    print("Created Key\t: %s" % key)
+    if(r.get(key)):
+        print("it is returned from redis")
+        return cPickle.loads(r.get(key))
+    else:
+        # Do MySQL query
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            data = cursor.fetchall()
+            connection.commit()
+    cursor.close()
+    # Put data into cache for 1 hour
+    r.set(key, cPickle.dumps(data))
+    r.expire(key, TTL);
+    print("Set data redis and return the data")
+    afterTime = time()
+    Totaltime = afterTime - beforeTime
+    # print (str(float(Totaltime)))
+    return render_template('memOK.html', time1=Totaltime)
+    #return 'Took time : ' + str(Totaltime)
 
 if __name__ == '__main__':
     app.run()
