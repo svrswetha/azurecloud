@@ -267,11 +267,30 @@ def county():
     #return 'Took time : ' + str(Totaltime)
 
 
+
+@app.route('/yearrange', methods=['GET','POST'])
+def yearrange():
+    res = []
+    year = request.form['year']
+    p1 = request.form['p1']
+    p2 = request.form['p2']
+    query1= "select  p.State from population p left join counties c on p.State = c.State where p.["+year+"] >=" + p1 + "  and p.["+year+"] <=" + p2 + ";"
+    print(query1)
+    cur = connection.cursor()
+    cur.execute(query1)
+     # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    count = 0
+    for row in data:
+        count = count + 1
+        res.append("State:" + str(row[0]))
+    return render_template('list2.html', res=res, count=count)
+
 @app.route('/rms', methods=['POST'])
 def rms():
     beforeTime = time()
     hits = 0;
-
     # LONG RANGE
     for x in range(1, 250):
         rand_number = float(random.randrange(0, 600) / 100)
