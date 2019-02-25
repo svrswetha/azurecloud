@@ -50,12 +50,24 @@ Limit:<input type="text" name="limit" placeholder="limit">
    </form>
    <hr>
 
+   <hr><p>Delete Based on RMS Value</p>
+           <form action="{{url_for('rms')}}" method="POST" enctype="multipart/form-data">
+               <input type="text" value="" name="rmsval" placeholder="Enter rms">
+               <input type="submit" value="RMS">
+               <table border=1>
+                   <thead>
+                   <td>RMS in table now</td>
+                   <p>{{msg}}</p>
+               </table>
+           </form>
+   <hr>
+
    <h3>memcache execution with input and providing no of times</h3>
-       <form id="files_form" action="/randomgen" method="POST" enctype="multipart/form-data">
+       <form id="index" action="/randomgen" method="POST" enctype="multipart/form-data">
            Enter value1<input type="text" name="depth" placeholder="Enter depth"><br><br>
            Enter value2<input type="text" name="times" placeholder="Enter count"><br><br>
+           <input type="submit" name="submit" value="submit">
 
-      <input type="submit" name="submit" value="submit">
 
    </body>
 </html>

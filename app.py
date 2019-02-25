@@ -216,7 +216,28 @@ def randomgen():
         #ran.append("Time: "+row[0])
     return render_template('randomgen.html',count=count,time = time_diff)
 
+@app.route('/rms', methods=['POST'])
+def rms():
+    beforeTime = time()
+    hits = 0;
 
+    # LONG RANGE
+    for x in range(1, 250):
+        rand_number = float(random.randrange(0, 600) / 100)
+        # print(rand_number)
+        result = r.get("magnitude" + str(rand_number))
+        if not result:
+            cursor.execute('SELECT * FROM dbo.all_month where mag = ?', (rand_number))
+            result = cursor.fetchall()
+            # print(result)
+            r.set("magnitude" + str(rand_number), cPickle.dumps(result), ex=3600)
+        else:
+            result = cPickle.loads(result)
+            hits = hits + 1
+    afterTime = time()
+    timeDifference = afterTime - beforeTime
+    msg = "Random Queries time=" + str(timeDifference) + " hit percentage=" + str(hits / 1000 * 100) + "\n"
+    return render_template('rdsquery.html', difference=msg)
 
 
 if __name__ == '__main__':
