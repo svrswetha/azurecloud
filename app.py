@@ -75,7 +75,7 @@ def ti():
 #     time_taken = (end_time - start_time)
 #     flash('The Avg Time taken to execute the random queries is : ' + "%.4f" % time_taken + " seconds")
 #     return render_template('index.html', t=time_taken)
-#
+
 
 @app.route('/Limit', methods=['get', 'post'])
 def limit():
@@ -215,6 +215,57 @@ def randomgen():
         count=count+1
         #ran.append("Time: "+row[0])
     return render_template('randomgen.html',count=count,time = time_diff)
+
+
+@app.route('/county', methods=['POST'])
+def county():
+    County = request.form['county']
+    print(County)
+    print('before query')
+    query1= "SELECT population. *, counties.County FROM population INNER JOIN counties ON population.State = counties.State and counties.County = '" + County + "';"
+    print('after query')
+    print(query1)
+    starttime = time()
+    print(starttime)
+    with connection.cursor() as cursor:
+        cursor.execute(query1)
+        connection.commit()
+    cursor.close()
+    endtime = time()
+    print('endtime')
+    totalsqltime = endtime - starttime
+    print(totalsqltime)
+    # return render_template('OK.html', time1=totalsqltime)
+
+    TTL = 36
+    sql = "SELECT population. *, counties.County FROM population INNER JOIN counties ON population.State = counties.State and counties.County = '" + County + "';"
+    # sql = "Select * from dbo.all_month where locationSource='" + limit + "';"
+    print("I am atlast here" + sql)
+    beforeTime = time()
+    hash = hashlib.sha224(sql.encode('utf-8')).hexdigest()
+    key = "sql_cache:" + hash
+    print("Created Key\t: %s" % key)
+    if(r.get(key)):
+        print("it is returned from redis")
+        return cPickle.loads(r.get(key))
+    else:
+        # Do MySQL query
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            data = cursor.fetchall()
+            connection.commit()
+    # cursor.close()
+    # Put data into cache for 1 hour
+    r.set(key, cPickle.dumps(data))
+    r.expire(key, TTL);
+    print("Set data redis and return the data")
+    afterTime = time()
+    Totaltime = afterTime - beforeTime
+    # print (str(float(Totaltime)))
+    msg = "Sql Time: "+ str(totalsqltime) + "Redis time: " + str(Totaltime)
+    return render_template('both.html', msg=msg)
+    #return 'Took time : ' + str(Totaltime)
+
 
 @app.route('/rms', methods=['POST'])
 def rms():
