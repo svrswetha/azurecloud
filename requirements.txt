@@ -1,2 +1,5 @@
 Flask==0.12.1
-pyodbc
+Jinja2==2.10
+pyodbc==4.0.26
+Werkzeug==0.14.1
+
