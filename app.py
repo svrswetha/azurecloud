@@ -8,6 +8,7 @@ import hashlib
 import redis
 import pickle as cPickle
 from random import *
+import random
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
@@ -143,6 +144,79 @@ def fetch():
         count = count + 1
         res.append("Magnitude:" + str(row[0]) + "  ; Location:" + str(row[1]))
     return render_template('list2.html', res=res, count=count)
+
+
+#normal execution time caclulation
+@app.route('/update', methods=["POST"])
+def update():
+    mr3 = request.form.get('mrs3')
+    start = time()
+    cur = connection.cursor()
+    cur.execute("select * from dbo.all_month where locationSource='" + mr3 + "';")
+    connection.commit()
+    end = time()
+    ti=end - start
+    return render_template("out.html", count=ti)
+
+
+@app.route('/rdsquery', methods=['POST'])
+def rdsquery():
+    # 1000 random queries normal execution
+    num = 100
+    c = connection.cursor()
+    sql_query_list = []
+    sql1 = "SELECT latitude FROM dbo.all_month where locationSource='ak';"
+    sql_query_list.append(sql1)
+    sql2 = "SELECT  longitude FROM dbo.all_month where locationSource='hv';"
+    sql_query_list.append(sql2)
+    sql3 = "SELECT  depth FROM dbo.all_month where locationSource='ak';"
+    sql_query_list.append(sql3)
+    length = len(sql_query_list)
+    start_time = time()
+    for j in range(1, int(num)):
+        randid = randint(1, int(length) - 1)
+        # print randid
+        sqlquery = sql_query_list[int(randid)]
+        # print sql_query_list[int(randid)]
+        # print sqlquery
+        c.execute(sqlquery)
+
+    end_time = time()
+    time_diff = end_time - start_time
+    return render_template('rdsquery.html', difference=time_diff)
+
+
+@app.route('/randomgen',methods=['POST'])
+def randomgen():
+    ran=[]
+    depth =int(request.form['depth'])
+    times = int(request.form['times'])
+    print(depth)
+    print(times)
+    c = connection.cursor()
+    num1=depth-5
+    num2=depth+5
+    st = time()
+    for i in range(1, int(times)):
+        print(random, type(random))
+        rand_number =random.randint(num1,num2)
+        # rno = rand_number
+        rno = rand_number
+        print(rno)
+        #sqlq = "SELECT time FROM dbo.all_month WHERE depth = %s"
+        #print (sqlq)
+        #c.execute(sqlq, rno)
+        c.execute('SELECT time FROM dbo.all_month WHERE depth='+str(rno))
+    et = time()
+    time_diff = et - st
+    data = c.fetchall()
+    count=0
+    for row in data:
+        count=count+1
+        #ran.append("Time: "+row[0])
+    return render_template('randomgen.html',count=count,time = time_diff)
+
+
 
 if __name__ == '__main__':
     app.run()
