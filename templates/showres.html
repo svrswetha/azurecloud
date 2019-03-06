@@ -26,10 +26,10 @@
 
         // Create the data table.
         var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Magnitude');
+        data.addColumn('number', 'Year');
 		data.addColumn('number', 'Count');
-		{% for i in datalist: %}
-			data.addRow([ '{{i}}', {{datalist[i]}} ]);
+		{% for i in rows: %}
+			data.addRow([ '{{i}}', {{rows[i]}} ]);
 		{% endfor %}
         // Set chart options
         var options = {'title':'Earthquake and Magnitude Pie Chart',
@@ -54,10 +54,10 @@
 
         // Create the data table.
         var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Magnitude');
+        data.addColumn('number', 'Year');
 		data.addColumn('number', 'Count');
-		{% for i in datalist: %}
-			data.addRow([ '{{i}}', {{datalist[i]}} ]);
+		{% for i in rows: %}
+			data.addRow([ '{{i}}', {{rows[i]}} ]);
 		{% endfor %}
         // Set chart options
         var options = {'title':'Earthquake and Magnitude Bar Chart',
@@ -83,7 +83,7 @@
 
         // Create the data table.
         var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Magnitude');
+        data.addColumn('number', 'Year');
 		data.addColumn('number', 'Count');
 		{% for i in datalist: %}
 			data.addRow([ '{{i}}', {{datalist[i]}} ]);

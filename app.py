@@ -379,22 +379,52 @@ def showyearwiseed():
     return render_template("showedyear.html", datalist=datalist)
 
 
-@app.route('/mydat')
+@app.route('/mydat', methods=['GET','POST'])
 def mydat():
-  cur = connection.cursor()
-  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 2.0 AND 2.5)")
-  full1 = cur.fetchone()
-  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 2.5 AND 3.0)")
-  full2 = cur.fetchone()
-  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 3.0 AND 3.5)")
-  full3 = cur.fetchone()
-  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 3.5 AND 4.0)")
-  full4 = cur.fetchone()
-  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 4.0 AND 4.5)")
-  full5 = cur.fetchone()
-  rows = [full1[0], full2[0], full3[0], full4[0], full5[0]]
-  print(rows)
-  return render_template('pie.html', rows=rows)
+    print('hi')
+    res = []
+    year = request.form['year']
+    p1 = request.form['p1']
+    p2 = request.form['p2']
+    p3 = request.form['p3']
+    p4 = request.form['p4']
+    p5 = request.form['p5']
+    p6 = request.form['p6']
+    rangelist = [0]
+    datalist = {}
+    for i in np.arange(1970, 2010, 5):
+        rangelist.append(i)
+    for i in rangelist:
+        cur.execute( "select  count(*) as total, p.State from population p where (p.["+year+"] >=" + p1 + "  and p.["+year+"] <=" + p2 + ") "
+                                                                                                                                         "or select  count(*) as total, p.State from population p where (p.["+year+"] >=" + p3 + "  and p.["+year+"] <=" + p4 + ") "
+                                                                                                                                                                                                                                                                "or select  count(*) as total, p.State from population p where (p.["+year+"] >=" + p5 + "  and p.["+year+"] <=" + p6 + " where (year between %s and %s))" % (i, (i + 5)))
+        # cur.execute("select count(*) as total from dbo.all_month  where (mag between %f and %f) and (Substring(time,1,10) BETWEEN \'%s\' and \'%s\')"%(i,(i+.5),date1, date2))
+        st = "Year (%s to %s)" % (i, i + 5)
+        datalist[st] = (cur.fetchone()[0])
+    cur.close()
+    return render_template("showedyear.html", datalist=datalist)
+
+    cur = connection.cursor()
+    print(cur)
+    # cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 2.0 AND 2.5)")
+    cur.execute("select  p.State from population p where (p.["+year+"] >=" + p1 + "  and p.["+year+"] <=" + p2 + ");")
+    full1 = cur.fetchone()
+    print(full1)
+  # cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 2.5 AND 3.0)")
+    cur.execute("select  p.State from population p where (p.[" + year + "] >=" + p3 + "  and p.[" + year + "] <=" + p4 + ");")
+    full2 = cur.fetchone()
+    print(full2)
+  # cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 3.0 AND 3.5)")
+    cur.execute("select  p.State from population p where (p.[" + year + "] >=" + p5 + "  and p.[" + year + "] <=" + p6 + ");")
+    full3 = cur.fetchone()
+    print(full3)
+  # cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 3.5 AND 4.0)")
+  # full4 = cur.fetchone()
+  # cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 4.0 AND 4.5)")
+  # full5 = cur.fetchone()
+    rows = [full1[0], full2[0], full3[0]]
+    print(rows)
+    return render_template('pie.html', rows=rows)
 
 
 @app.route('/y1', methods=['GET','POST'])
@@ -451,6 +481,24 @@ def y3():
     for row in data:
         count = count + 1
         res.append("State:" + str(row[0]))
+    return render_template('list2.html', res=res, count=count)
+
+@app.route('/q9', methods=['GET','POST'])
+def q9():
+    res = []
+    code = request.form['code']
+    year1 = request.form['year1']
+    year2 = request.form['year2']
+    query1= "select BLPercent from education where education.code = '"+code+"' and year between "+year1+"and "+year2+""
+    cur = connection.cursor()
+    cur.execute(query1)
+     # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    count = 0
+    for row in data:
+        count = count + 1
+        res.append(str(row[0]))
     return render_template('list2.html', res=res, count=count)
 
 if __name__ == '__main__':

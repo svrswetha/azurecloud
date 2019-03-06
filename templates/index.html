@@ -130,11 +130,26 @@ Limit:<input type="text" name="limit" placeholder="limit">
    </body>
 </html>
 
-<form id="in" action="/mydat">
-    <p>Give a magnitude to search for earthquakes greater than that</p>
-        <input type="text" placeholder="Magnitude" name="Magnitude" value="{{request.form.Magnitude}}">
-        <input class="btn btn-default" type="submit" value="search">
-      </form>
+<form id="in" action="/mydat" method="post">
+    <br>
+    year:<input type="number" name="year" placeholder="year">
+    GROUP1:
+    pop1:<input type="number" name="p1" placeholder="p1">
+    pop2:<input type="number" name="p2" placeholder="p2">
+    GROUP2:
+    pop1:<input type="number" name="p3" placeholder="p3">
+    pop2:<input type="number" name="p4" placeholder="p4">
+    GROUP3:
+    pop1:<input type="number" name="p5" placeholder="p5">
+    pop2:<input type="number" name="p6" placeholder="p6">
+    <input class="btn btn-default" type="submit" value="search">
+</form>
+
+{#    </form>#}
+{#    <p>Give a magnitude to search for earthquakes greater than that</p>#}
+{#        <input type="text" placeholder="Magnitude" name="Magnitude" value="{{request.form.Magnitude}}">#}
+{#        <input class="btn btn-default" type="submit" value="search">#}
+{#      </form>#}
 
 <form id="index" action ="/y1" method ="POST" enctype="multipart/form-data">
         <br>
@@ -165,5 +180,13 @@ year:<input type="number" name="year" placeholder="year">
     <br> Execute:  <input id="button" type="submit" value="submit">
 </form>
 
+<form id="index" action ="/q9" method ="POST" enctype="multipart/form-data">>
+
+     code:<input type="text" name="code" placeholder="code">
+     Year1:<input type="number" name="year1" placeholder="year1">
+     Year2:<input type="number" name="year2" placeholder="year2">
+    <br> Execute:  <input id="button" type="submit" value="submit">
+
+</form>
 </body>
 </html>
