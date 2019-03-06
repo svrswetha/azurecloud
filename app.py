@@ -378,6 +378,23 @@ def showyearwiseed():
     cur.close()
     return render_template("showedyear.html", datalist=datalist)
 
+@app.route('/q99', methods=['GET','POST'] )
+def q99():
+    cur = connection.cursor()
+    code = request.form['code']
+    rangelist = [0]
+    datalist = {}
+    for i in np.arange(1970,2010,5):
+        rangelist.append(i)
+    for i in rangelist:
+        cur.execute(" select count(*) as total from dbo.education where education.code = '"+code+"' and  (year between %s and %s)"% (i,(i+5)))
+        # cur.execute("select count(*) as total from dbo.all_month  where (mag between %f and %f) and (Substring(time,1,10) BETWEEN \'%s\' and \'%s\')"%(i,(i+.5),date1, date2))
+        st = "Year (%s to %s)" % (i, i + 5)
+        datalist[st] = (cur.fetchone()[0])
+    cur.close()
+    return render_template("showedyear.html", datalist=datalist)
+
+
 
 @app.route('/mydat', methods=['GET','POST'])
 def mydat():
