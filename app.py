@@ -363,5 +363,20 @@ def showdate():
     cur.close()
     return render_template("showres.html", datalist=datalist)
 
+@app.route('/showyearwiseed')
+def showyearwiseed():
+    cur = connection.cursor()
+    rangelist = [0]
+    datalist = {}
+    for i in np.arange(1970,2010,5):
+        rangelist.append(i)
+    for i in rangelist:
+        cur.execute(" select count(*) as total from dbo.education where (year between %s and %s)"% (i,(i+5)))
+        # cur.execute("select count(*) as total from dbo.all_month  where (mag between %f and %f) and (Substring(time,1,10) BETWEEN \'%s\' and \'%s\')"%(i,(i+.5),date1, date2))
+        st = "Year (%s to %s)" % (i, i + 5)
+        datalist[st] = (cur.fetchone()[0])
+    cur.close()
+    return render_template("showedyear.html", datalist=datalist)
+
 if __name__ == '__main__':
     app.run()
