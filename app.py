@@ -378,5 +378,80 @@ def showyearwiseed():
     cur.close()
     return render_template("showedyear.html", datalist=datalist)
 
+
+@app.route('/mydat')
+def mydat():
+  cur = connection.cursor()
+  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 2.0 AND 2.5)")
+  full1 = cur.fetchone()
+  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 2.5 AND 3.0)")
+  full2 = cur.fetchone()
+  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 3.0 AND 3.5)")
+  full3 = cur.fetchone()
+  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 3.5 AND 4.0)")
+  full4 = cur.fetchone()
+  cur.execute("SELECT count(mag) from dbo.all_month where (mag BETWEEN 4.0 AND 4.5)")
+  full5 = cur.fetchone()
+  rows = [full1[0], full2[0], full3[0], full4[0], full5[0]]
+  print(rows)
+  return render_template('pie.html', rows=rows)
+
+
+@app.route('/y1', methods=['GET','POST'])
+def y1():
+    res = []
+    year = request.form['year']
+    p1 = request.form['p1']
+    p2 = request.form['p2']
+
+    query1= "select  p.State from population p where (p.["+year+"] >=" + p1 + "  and p.["+year+"] <=" + p2 + ");"
+    cur = connection.cursor()
+    cur.execute(query1)
+     # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    count = 0
+    for row in data:
+        count = count + 1
+        res.append("State:" + str(row[0]))
+    return render_template('list2.html', res=res, count=count)
+
+@app.route('/y2', methods=['GET','POST'])
+def y2():
+    res = []
+    year = request.form['year']
+    p3 = request.form['p3']
+    p4 = request.form['p4']
+    query2 = "select  p.State from population p where (p.["+year+"] >=" + p3 + "  and p.["+year+"] <=" + p4 + ");"
+    cur = connection.cursor()
+    cur.execute(query2)
+     # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    count = 0
+    for row in data:
+        count = count + 1
+        res.append("State:" + str(row[0]))
+    return render_template('list2.html', res=res, count=count)
+
+@app.route('/y3', methods=['GET','POST'])
+def y3():
+    res = []
+    year = request.form['year']
+
+    p5 = request.form['p5']
+    p6 = request.form['p6']
+    query3 = "select  p.State from population p where (p.[" + year + "] >=" + p5 + "  and p.[" + year + "] <=" + p6 + ");"
+    cur = connection.cursor()
+    cur.execute(query3)
+     # cur.execute('select mag,locationSource from dbo.all_month where locationSource="'+mr+'" and mag between' + mr1 + 'and' + mr2)
+    data = cur.fetchall()
+    print(data)
+    count = 0
+    for row in data:
+        count = count + 1
+        res.append("State:" + str(row[0]))
+    return render_template('list2.html', res=res, count=count)
+
 if __name__ == '__main__':
     app.run()
