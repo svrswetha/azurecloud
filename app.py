@@ -1,6 +1,6 @@
 import math
 
-from flask import Flask, request, render_template, flash
+from flask import Flask, request, render_template, flash, jsonify
 import pyodbc
 from time import time
 import csv
@@ -9,6 +9,8 @@ import redis
 import pickle as cPickle
 from random import *
 import random
+import time
+import numpy as np
 
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'memcached'
@@ -32,6 +34,12 @@ r = redis.StrictRedis(host="swethacache.redis.cache.windows.net",port=6380,passw
 def ti():
     time_taken = 1553.81233311
     flash('The Avg Time taken to execute the random queries is : ' + "%.4f" % time_taken + " seconds")
+    # labels = '2011','2012','2013','2014'
+    # y_pos = np.arange(len(labels))
+    # plt.bar(y_pos, time_taken, align='center', alpha=0.5)
+    # plt.xticks(y_pos, labels)
+    # plt.ylabel('time')
+    # plt.show()
     return render_template('index.html', t=time_taken)
 # @app.route('/')
 # def index():
@@ -85,13 +93,13 @@ def limit():
     query1 = "Select * from dbo.all_month where locationSource='" + limit + "';"
     print('after query')
     print(query1)
-    starttime = time()
+    starttime = time.time()
     print(starttime)
     with connection.cursor() as cursor:
         cursor.execute(query1)
         connection.commit()
     cursor.close()
-    endtime = time()
+    endtime = time.time()
     print('endtime')
     totalsqltime = endtime - starttime
     print(totalsqltime)
@@ -103,7 +111,7 @@ def memexec():
     limit = request.form['limit']
     sql = "Select * from dbo.all_month where locationSource='" + limit + "';"
     print("I am atlast here" + sql)
-    beforeTime = time()
+    beforeTime = time.time()
     hash = hashlib.sha224(sql.encode('utf-8')).hexdigest()
     key = "sql_cache:" + hash
     print("Created Key\t: %s" % key)
@@ -287,6 +295,28 @@ def yearrange():
         res.append("State:" + str(row[0]))
     return render_template('list2.html', res=res, count=count)
 
+@app.route('/rms', methods=['POST'])
+def rms():
+    beforeTime = time()
+    hits = 0;
+    # LONG RANGE
+    for x in range(1, 250):
+        rand_number = float(random.randrange(0, 600) / 100)
+        # print(rand_number)
+        result = r.get("magnitude" + str(rand_number))
+        if not result:
+            cursor.execute('SELECT * FROM dbo.all_month where mag = ?', (rand_number))
+            result = cursor.fetchall()
+            # print(result)
+            r.set("magnitude" + str(rand_number), cPickle.dumps(result), ex=3600)
+        else:
+            result = cPickle.loads(result)
+            hits = hits + 1
+    afterTime = time()
+    timeDifference = afterTime - beforeTime
+    msg = "Random Queries time=" + str(timeDifference) + " hit percentage=" + str(hits / 1000 * 100) + "\n"
+    return render_template('rdsquery.html', difference=msg)
+
 @app.route('/code', methods=['GET','POST'])
 def code():
     res = []
@@ -318,29 +348,20 @@ def countydis():
     print(data)
     return render_template('list_county.html', data = data)
 
-@app.route('/rms', methods=['POST'])
-def rms():
-    beforeTime = time()
-    hits = 0;
-    # LONG RANGE
-    for x in range(1, 250):
-        rand_number = float(random.randrange(0, 600) / 100)
-        # print(rand_number)
-        result = r.get("magnitude" + str(rand_number))
-        if not result:
-            cursor.execute('SELECT * FROM dbo.all_month where mag = ?', (rand_number))
-            result = cursor.fetchall()
-            # print(result)
-            r.set("magnitude" + str(rand_number), cPickle.dumps(result), ex=3600)
-        else:
-            result = cPickle.loads(result)
-            hits = hits + 1
-    afterTime = time()
-    timeDifference = afterTime - beforeTime
-    msg = "Random Queries time=" + str(timeDifference) + " hit percentage=" + str(hits / 1000 * 100) + "\n"
-    return render_template('rdsquery.html', difference=msg)
-
-
+@app.route('/showmag')
+def showdate():
+    cur = connection.cursor()
+    rangelist = [0]
+    datalist = {}
+    for i in np.arange(2,6.5,.5):
+        rangelist.append(i)
+    for i in rangelist:
+        cur.execute(" select count(*) as total from dbo.all_month where (mag between %f and %f)"% (i,(i+.5)))
+        # cur.execute("select count(*) as total from dbo.all_month  where (mag between %f and %f) and (Substring(time,1,10) BETWEEN \'%s\' and \'%s\')"%(i,(i+.5),date1, date2))
+        st = "Magnitude (%.2f to %.2f)" % (i, i + 0.5)
+        datalist[st] = (cur.fetchone()[0])
+    cur.close()
+    return render_template("showres.html", datalist=datalist)
 
 if __name__ == '__main__':
     app.run()
