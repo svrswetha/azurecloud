@@ -21,7 +21,7 @@ connection = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};Server=sweth
 cursor = connection.cursor()
 print(cursor)
 
-r = redis.StrictRedis(host="swethacache.redis.cache.windows.net",port=6380,password='abLrdUdH00V7BjipqOZ2McUopRaOkc8hgsr8jo6PRuQ=',ssl=True)
+r = redis.StrictRedis(host="swethacache.redis.cache.windows.net",port=6380,password='XXXX',ssl=True)
 
 
 #
