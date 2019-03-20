@@ -13,8 +13,8 @@ import time
 import numpy as np
 
 app = Flask(__name__)
-app.config['SESSION_TYPE'] = 'memcached'
-app.config['SECRET_KEY'] = 'Secret'
+app.config['SESSION_TYPE'] = 'XXXXX'
+app.config['SECRET_KEY'] = 'XXXXXX'
 
 connection = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};Server=swethacloudserver.database.windows.net;Database=Sapp1;Uid=xxxxx;Pwd=xxxxx")
 
